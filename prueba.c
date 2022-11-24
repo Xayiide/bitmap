@@ -6,14 +6,16 @@
 #include "inc/bitmap.h"
 
 #define TAM_MAX 256
-#define NUM_OPC 2
+#define OPC_MEN 2
+#define OPC_AVT 3
 
 
 void menu(void);
+void menuavatar(void);
 int  leeIntRango(int *, int, int);
 int  leenombre(char *);
 int  escogeopc(int, int);
-void creaAvatar(uint16_t, uint16_t);
+void creacionAvatar(void);
 void analizaCabeceras(void);
 
 
@@ -21,9 +23,17 @@ void menu() {
 	printf("\n\n");
 	printf(" === Menú principal ===\n");
 	printf(" 1. Muestra información sobre las cabeceras de un .bmp.\n");
-	printf(" 2. Crea un avatar 16x16.\n");
+	printf(" 2. Crea un avatar.\n");
 	/* recuerda actualizar NUM_OPC si cambias las opciones */
 	printf("    0. Salir.\n");
+}
+
+void menuavatar() {
+	printf(" 1. Simetría horizontal.\n");
+	printf(" 2. Simetría vertical.\n");
+	printf(" 3. Simetría a cuartos.\n");
+
+	printf("    0. Cancelar.\n");
 }
 
 int leeIntRango(int *v, int bajo, int alto) {
@@ -83,22 +93,39 @@ int escogeopc(int bajo, int alto) {
 	return valor;
 }
 
-void creaAvatar(uint16_t ancho, uint16_t alto) {
-	FILE *avatarbmp;
-	avatarbmp = fopen(AVATARFN, "w");
-	if (avatarbmp == NULL) {
-		printf("Error while opening file %s\n", AVATARFN);
-		return;
-	}
+void creacionAvatar(void) {
+	int seleccion = 0;
+
+	do {
+		menuavatar();
+		seleccion = escogeopc(0, 3);
+		switch (seleccion) {
+		case 1:
+			printf("Creando un avatar de 8x8 con simetría horizontal.\n");
+			creaAvatar(8, 8, HORIZONTAL);
+			break;
+		case 2:
+			printf("Creando un avatar de 8x8 con simetría vertical.\n");
+			creaAvatar(8, 8, HORIZONTAL);
+			break;
+		case 3:
+			printf("Creando un avatar de 8x8 a cuartos.\n");
+			creaAvatar(8, 8, HORIZONTAL);
+			break;
+		default:
+			printf("Volviendo al menú principal.\n");
+			break;
+		}
+	} while (seleccion == 0);
 }
+
+
+
 
 void analizaCabeceras(void) {
 	int valido = 0;
 	char nombrefichero[TAM_MAX];
 	FILE *bmp;
-
-	bmpFileHdr filehdr;
-	bmpInfoHdr infohdr;
 
 	do {
 		valido = leenombre(nombrefichero);
@@ -111,19 +138,9 @@ void analizaCabeceras(void) {
 		return;
 	}
 
-	/* TODO: meter toda esta parte en compruebaCabeceras(bmp) para que
-	 * en main no se haga mención a nada que sea propio de bitmap */
 
-	/* lee las cabeceras */
-	fread(&filehdr, sizeof(bmpFileHdr), 1, bmp);
-	fread(&infohdr, sizeof(bmpInfoHdr), 1, bmp);
-
-	if (compruebaCabeceras(&filehdr, &infohdr) == 0) {
-		printf("Imagen bmp reconocida.\n");
-		procesaCabeceras(&filehdr, &infohdr);
-	}
-	else {
-		printf("Error con la imagen %s.\n", nombrefichero);
+	if (leeCabeceras(bmp) != 0) {
+		printf("No se reconoce la imagen bmp. Cabeceras corruptas.\n");
 	}
 
 	fclose(bmp);
@@ -137,14 +154,13 @@ int main(void) {
 
 	do {
 		menu();
-		seleccion = escogeopc(0, NUM_OPC);
+		seleccion = escogeopc(0, OPC_MEN);
 		switch (seleccion) {
 		case 1:
 			analizaCabeceras();
 			break;
 		case 2:
-			printf("Creando avatar 16x16.\n");
-			creaAvatar(16, 16);
+			creacionAvatar();
 			break;
 		default:
 			printf("Saliendo...\n");

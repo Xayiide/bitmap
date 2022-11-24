@@ -1,0 +1,26 @@
+# images
+*.png
+*.svg
+*.jpeg
+*.bmp
+
+
+# swap files and temp files
+*.swp
+.~
+
+
+# executables, libraries, objects
+*.o
+*.obj
+*.lib
+*.so
+*.out
+
+# eclipse
+.cproject
+.project
+.settings/
+
+# vscode
+.vscode

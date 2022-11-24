@@ -6,11 +6,21 @@
 
 #define AVATARFN "avatar.bmp"
 
-#define BFTYPE        0x4D42
-#define BFOFFBITS     54
-#define BISIZE        40
-#define BIBITCOUNT    24
-#define BICOMPRESSION 0
+#define BFTYPE         0x4D42
+#define BFRESERVED1    0x0000
+#define BFRESERVED2    0x0000
+#define BFOFFBITS      54
+#define BFSIZE         14
+
+
+#define BISIZE         40
+#define BIPLANES       0x0001
+#define BIBITCOUNT     24
+#define BICOMPRESSION  0x00000000
+#define BIXPELSPM      0x0B12 /* 2834 */
+#define BIYPELSPM      0x0B12 /* 2834 */
+#define BICLRUSED      0x00000000
+#define BICLRIMPORTANT 0x00000000
 
 /* FILE HEADER: 14 bytes */
 typedef struct {
@@ -42,9 +52,19 @@ typedef struct {
 	uint8_t red;
 } rgbpxl;
 
-int compruebaCabeceras_(FILE *);
+
+
+typedef enum {
+	HORIZONTAL,
+	VERTICAL,
+	CUARTOS
+} simetria;
+
+int leeCabeceras(FILE *);
 
 int compruebaCabeceras(bmpFileHdr *, bmpInfoHdr *);
-void procesaCabeceras(bmpFileHdr *, bmpInfoHdr *);
+void imprimeCabeceras(bmpFileHdr *, bmpInfoHdr *);
+
+int creaAvatar(uint16_t, uint16_t, simetria);
 
 #endif
