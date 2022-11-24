@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <byteswap.h> /* __bswap_XX */
+#include <byteswap.h> /* __bswap_XX  */
+#include <stdlib.h>   /* rand, srand */
+#include <time.h>     /* time        */
 
 #include "inc/bitmap.h"
 
-static int creaCabeceras(FILE *, uint16_t, uint16_t);
+
+static int  creaCabeceras(FILE *, uint16_t);
+static void simetriaHor(FILE*, uint16_t, rgbpxl *, rgbpxl *);
 
 int leeCabeceras(FILE *bmp) {
 	int ret = 0;
@@ -68,11 +72,14 @@ void imprimeCabeceras(bmpFileHdr *f, bmpInfoHdr *i) {
 	printf("biClrImportant:  0x%08X\n", i->biClrImportant);
 }
 
-int creaAvatar(uint16_t ancho, uint16_t alto, simetria sim) {
+int creaAvatar(uint16_t lado, simetria sim) {
 	int ret = 0;
 	FILE *bmp;
 	/* ancho y alto por ahora van a ser siempre 8 así que por ahora no hago
 	 * comprobaciones sobre la validez de las dimensiones introducidas */
+	rgbpxl fondo = {0x00, 0xFF, 0x00};
+	rgbpxl linea = {0xFF, 0x00, 0x00};
+
 
 	bmp = fopen(AVATARFN, "w");
 	if (bmp == NULL) {
@@ -80,12 +87,13 @@ int creaAvatar(uint16_t ancho, uint16_t alto, simetria sim) {
 		return -1;
 	}
 
-	if (creaCabeceras(bmp, ancho, alto) != 0) {
+	if (creaCabeceras(bmp, lado) != 0) {
 		return -1;
 	}
 
 	switch (sim) {
 	case HORIZONTAL:
+		simetriaHor(bmp, lado, &fondo, &linea);
 		break;
 	case VERTICAL:
 		break;
@@ -100,13 +108,13 @@ int creaAvatar(uint16_t ancho, uint16_t alto, simetria sim) {
 	return ret;
 }
 
-int creaCabeceras(FILE *bmp, uint16_t ancho, uint16_t alto) {
+int creaCabeceras(FILE *bmp, uint16_t lado) {
 	int ret = 0;
 	bmpFileHdr filehdr;
 	bmpInfoHdr infohdr;
 	int tammapapixel;
 
-	tammapapixel = ((BIBITCOUNT/8) * ancho * alto);
+	tammapapixel = ((BIBITCOUNT/8) * lado * lado);
 
 	filehdr.bfType      = BFTYPE;
 	filehdr.bfSize      = BFSIZE + BISIZE + tammapapixel;
@@ -115,8 +123,8 @@ int creaCabeceras(FILE *bmp, uint16_t ancho, uint16_t alto) {
 	filehdr.bfOffBits   = BFOFFBITS;
 
 	infohdr.biSize          = BISIZE;
-	infohdr.biWidth         = ancho;
-	infohdr.biHeight        = -alto;
+	infohdr.biWidth         = lado;
+	infohdr.biHeight        = -lado;
 	infohdr.biPlanes        = BIPLANES;
 	infohdr.biBitCount      = BIBITCOUNT;
 	infohdr.biCompression   = BICOMPRESSION;
@@ -136,4 +144,39 @@ int creaCabeceras(FILE *bmp, uint16_t ancho, uint16_t alto) {
 	}
 
 	return ret;
+}
+
+void simetriaHor(FILE* bmp, uint16_t lado, rgbpxl *fondo, rgbpxl *linea) {
+	uint16_t ancho = lado; /* por claridad */
+	uint16_t alto  = lado / 2;
+	int i, j;
+	uint8_t aux[alto][ancho];
+
+	srand(time(NULL));
+
+	/* Paso 1: recorrer la mitad superior de la imagen */
+	for (i = 0; i < alto; i++) {
+		for (j = 0; j < ancho; j++) {
+			if (rand() % 4 == 0) {
+				aux[i][j] = 1;
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				aux[i][j] = 0;
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+	}
+
+	/* Paso 2: recorrer la mitad inferior de la imagen */
+	for (i = alto -1; i >= 0; i--) {
+		for (j = 0; j < ancho; j++) {
+			if (aux[i][j]) {
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+	}
 }

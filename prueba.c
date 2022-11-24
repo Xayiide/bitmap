@@ -102,15 +102,15 @@ void creacionAvatar(void) {
 		switch (seleccion) {
 		case 1:
 			printf("Creando un avatar de 8x8 con simetría horizontal.\n");
-			creaAvatar(8, 8, HORIZONTAL);
+			creaAvatar(8, HORIZONTAL);
 			break;
 		case 2:
 			printf("Creando un avatar de 8x8 con simetría vertical.\n");
-			creaAvatar(8, 8, HORIZONTAL);
+			creaAvatar(8, HORIZONTAL);
 			break;
 		case 3:
 			printf("Creando un avatar de 8x8 a cuartos.\n");
-			creaAvatar(8, 8, HORIZONTAL);
+			creaAvatar(8, HORIZONTAL);
 			break;
 		default:
 			printf("Volviendo al menú principal.\n");

@@ -65,6 +65,6 @@ int leeCabeceras(FILE *);
 int compruebaCabeceras(bmpFileHdr *, bmpInfoHdr *);
 void imprimeCabeceras(bmpFileHdr *, bmpInfoHdr *);
 
-int creaAvatar(uint16_t, uint16_t, simetria);
+int creaAvatar(uint16_t, simetria);
 
 #endif
