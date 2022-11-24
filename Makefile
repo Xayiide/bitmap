@@ -18,5 +18,6 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	@rm -f $(TARGET) $(OBJECTS)
+	@echo "clean"
 
 re: clean all

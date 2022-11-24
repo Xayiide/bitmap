@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
-//#include <errno.h>   /* errno    */
-#include <string.h>  /* strerror */
+#include <stdlib.h>  /* srand */
+#include <time.h>    /* time  */
 
 #include "inc/bitmap.h"
 
@@ -99,6 +99,7 @@ void creacionAvatar(void) {
 	do {
 		menuavatar();
 		seleccion = escogeopc(0, 3);
+		srand(time(NULL));
 		switch (seleccion) {
 		case 1:
 			printf("Creando un avatar de 8x8 con simetría horizontal.\n");
@@ -106,11 +107,11 @@ void creacionAvatar(void) {
 			break;
 		case 2:
 			printf("Creando un avatar de 8x8 con simetría vertical.\n");
-			creaAvatar(8, HORIZONTAL);
+			creaAvatar(8, VERTICAL);
 			break;
 		case 3:
 			printf("Creando un avatar de 8x8 a cuartos.\n");
-			creaAvatar(8, HORIZONTAL);
+			creaAvatar(8, CUARTOS);
 			break;
 		default:
 			printf("Volviendo al menú principal.\n");

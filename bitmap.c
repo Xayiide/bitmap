@@ -8,7 +8,9 @@
 
 
 static int  creaCabeceras(FILE *, uint16_t);
-static void simetriaHor(FILE*, uint16_t, rgbpxl *, rgbpxl *);
+static void simetriaHor(FILE *, uint16_t, rgbpxl *, rgbpxl *);
+static void simetriaVer(FILE *, uint16_t, rgbpxl *, rgbpxl *);
+static void simetria4(FILE *, uint16_t, rgbpxl *, rgbpxl *);
 
 int leeCabeceras(FILE *bmp) {
 	int ret = 0;
@@ -96,8 +98,10 @@ int creaAvatar(uint16_t lado, simetria sim) {
 		simetriaHor(bmp, lado, &fondo, &linea);
 		break;
 	case VERTICAL:
+		simetriaVer(bmp, lado, &fondo, &linea);
 		break;
 	case CUARTOS:
+		simetria4(bmp, lado, &fondo, &linea);
 		break;
 	default:
 		break;
@@ -149,10 +153,9 @@ int creaCabeceras(FILE *bmp, uint16_t lado) {
 void simetriaHor(FILE* bmp, uint16_t lado, rgbpxl *fondo, rgbpxl *linea) {
 	uint16_t ancho = lado; /* por claridad */
 	uint16_t alto  = lado / 2;
-	int i, j;
-	uint8_t aux[alto][ancho];
+	int      i, j;
+	uint8_t  aux[alto][ancho];
 
-	srand(time(NULL));
 
 	/* Paso 1: recorrer la mitad superior de la imagen */
 	for (i = 0; i < alto; i++) {
@@ -169,9 +172,95 @@ void simetriaHor(FILE* bmp, uint16_t lado, rgbpxl *fondo, rgbpxl *linea) {
 	}
 
 	/* Paso 2: recorrer la mitad inferior de la imagen */
-	for (i = alto -1; i >= 0; i--) {
+	for (i = alto - 1; i >= 0; i--) {
 		for (j = 0; j < ancho; j++) {
 			if (aux[i][j]) {
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+	}
+}
+
+void simetriaVer(FILE *bmp, uint16_t lado, rgbpxl *fondo, rgbpxl *linea) {
+	uint16_t ancho = lado / 2;
+	uint16_t alto  = lado; /* por claridad */
+	int      i, j;
+	uint8_t  aux[ancho];
+
+	/* Al tener que duplicar por eje vertical no tengo que hacer el mismo
+	 * procedimiento que con la simetría horizontal */
+	for (i = 0; i < alto; i++) {
+		for (j = 0; j < ancho; j++) {
+			if (rand() % 4 == 0) {
+				aux[j] = 1;
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				aux[j] = 0;
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+
+		for (j = 0; j < ancho; j++) {
+			if (aux[ancho - j - 1]) {
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+	}
+}
+
+void simetria4(FILE *bmp, uint16_t lado, rgbpxl *fondo, rgbpxl *linea) {
+	uint16_t ancho = lado / 2;
+	uint16_t alto  = lado / 2;
+	int      i, j;
+	uint8_t  aux[alto][ancho];
+
+	/* Mitad superior */
+	for (i = 0; i < alto; i++) {
+		/* cuarto superior izquierdo */
+		for (j = 0; j < ancho; j++) {
+			if (rand() % 4 == 0) {
+				aux[i][j] = 1;
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				aux[i][j] = 0;
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+
+		/* cuarto superior derecho */
+		for (j = 0; j < ancho; j++) {
+			if (aux[i][ancho - j - 1]) {
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+	}
+
+	/* Mitad inferior */
+	for (i = 0; i < alto; i++) {
+		/* cuarto inferior izquierdo */
+		for (j = 0; j < ancho; j++) {
+			if (aux[alto - i - 1][j]) {
+				fwrite(linea, sizeof(rgbpxl), 1, bmp);
+			}
+			else {
+				fwrite(fondo, sizeof(rgbpxl), 1, bmp);
+			}
+		}
+
+		/* cuarto inferior dcho */
+		for (j = 0; j < ancho; j++) {
+			if (aux[alto - i - 1][ancho - j - 1]) {
 				fwrite(linea, sizeof(rgbpxl), 1, bmp);
 			}
 			else {
